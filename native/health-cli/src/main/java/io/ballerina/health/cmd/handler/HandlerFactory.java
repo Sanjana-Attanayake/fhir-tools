@@ -45,16 +45,20 @@ public class HandlerFactory {
                 Handler templateHandler = new FhirTemplateGenHandler();
                 templateHandler.init(printStream, specificationPath, fhirVersion);
                 return templateHandler;
+
             case CMD_FHIR_MODE_CLIENT:
                 return new FhirClientGenHandler();
+
             case CMD_FHIR_MODE_PACKAGE:
                 Handler packageHandler = new FhirPackageGenHandler();
                 packageHandler.init(printStream, specificationPath, fhirVersion);
                 return packageHandler;
+
             case CMD_CDS_MODE_TEMPLATE:
                 Handler crdTemplateGenHandler = new CrdTemplateGenHandler();
                 crdTemplateGenHandler.init(printStream, specificationPath, fhirVersion);
                 return crdTemplateGenHandler;
+
             default:
                 throw new BallerinaHealthException(ErrorMessages.INVALID_MODE);
         }

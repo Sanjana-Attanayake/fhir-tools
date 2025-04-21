@@ -103,6 +103,8 @@ public class TestRunner {
         String fhirVersion = "r4";
         String command = "fhir";
 
+        System.setProperty("fhir.version", fhirVersion);
+
         String resourcePath = Paths.get(Objects.requireNonNull(TestRunner.class.getClassLoader().getResource("io")).toURI()).getParent().getParent().toString() + "\\test-classes" + "\\profiles.USCore";
         System.out.println("Resource Path: " + resourcePath);
 
