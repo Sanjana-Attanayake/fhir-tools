@@ -12,8 +12,6 @@ export = [
 "${packageName}.terminology",
 "${packageName}.validator"
 ]
-#else
-export = ["${packageName}"]
 #end
 
 #foreach($dependency in $dependencies)
