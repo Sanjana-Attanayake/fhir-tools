@@ -70,6 +70,7 @@ public class FhirTemplateGenHandler implements Handler {
         }
         fhirToolLib = (FHIRTool) initializeLib(
                 HealthCmdConstants.CMD_SUB_FHIR, printStream, configJson, specificationPath);
+        fhirVersion = fhirToolLib.getFhirVersion();
     }
 
     @Override
@@ -78,7 +79,6 @@ public class FhirTemplateGenHandler implements Handler {
         this.packageName = (String) argsMap.get("--package-name");
         this.orgName = (String) argsMap.get("--org-name");
         this.packageVersion = (String) argsMap.get("--package-version");
-        this.fhirVersion = (String) argsMap.get("--fhir-version");
         this.dependentPackage = (String) argsMap.get("--dependent-package");
         this.includedProfiles = (String[]) argsMap.get("--included-profile");
         this.excludedProfiles = (String[]) argsMap.get("--excluded-profile");

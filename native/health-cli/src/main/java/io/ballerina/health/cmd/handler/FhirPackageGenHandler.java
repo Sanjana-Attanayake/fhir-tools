@@ -67,6 +67,7 @@ public class FhirPackageGenHandler implements Handler {
             throw new RuntimeException(e);
         }
         fhirToolLib = (FHIRTool) initializeLib(HealthCmdConstants.CMD_SUB_FHIR, printStream, configJson, specificationPath);
+        fhirVersion = fhirToolLib.getFhirVersion();
     }
 
     @Override
@@ -75,7 +76,6 @@ public class FhirPackageGenHandler implements Handler {
         this.packageName = (String) argsMap.get("--package-name");
         this.orgName = (String) argsMap.get("--org-name");
         this.packageVersion = (String) argsMap.get("--package-version");
-        this.fhirVersion = (String) argsMap.get("--fhir-version");
         this.dependentIgs = (String[]) argsMap.get("--dependent-ig");
     }
 
@@ -131,22 +131,18 @@ public class FhirPackageGenHandler implements Handler {
                     toolConfigInstance.overrideConfig("packageConfig.packageVersion", overrideConfig);
                 }
                 if (fhirVersion != null && !fhirVersion.isEmpty() && !fhirVersion.equalsIgnoreCase("r4")) {
+                    // Override fhirVersion in tool-config.json
                     JsonElement overrideConfig = new Gson().toJsonTree(fhirVersion.toLowerCase());
                     toolConfigInstance.overrideConfig("packageConfig.fhirVersion", overrideConfig);
-                }
-                if (fhirVersion != null && !fhirVersion.isEmpty() && fhirVersion.equalsIgnoreCase("r5")) {
-                    // Override basePackage and dependentPackage in tool-config.json
-                    final String r5Repository = toolExecConfig.getAsJsonObject("config").
-                            getAsJsonObject("packageConfigs").
-                            getAsJsonObject("versionConfigs").
-                            getAsJsonObject("r5").
-                            getAsJsonPrimitive("repository").getAsString();
 
-                    final String r5BasePackage = toolExecConfig.getAsJsonObject("config").
+                    // Override basePackage and dependentPackage in tool-config.json
+                    final JsonObject jsonPath = toolExecConfig.getAsJsonObject("config").
                             getAsJsonObject("packageConfigs").
                             getAsJsonObject("versionConfigs").
-                            getAsJsonObject("r5").
-                            getAsJsonPrimitive("basePackage").getAsString();
+                            getAsJsonObject(fhirVersion);
+
+                    final String r5Repository = jsonPath.getAsJsonPrimitive("repository").getAsString();
+                    final String r5BasePackage = jsonPath.getAsJsonPrimitive("basePackage").getAsString();
 
                     JsonElement overrideConfigRepository = new Gson().toJsonTree(r5Repository);
                     JsonElement overrideConfigBase = new Gson().toJsonTree(r5BasePackage);
