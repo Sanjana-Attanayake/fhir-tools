@@ -69,15 +69,11 @@ public class ComponentYamlGenerator extends AbstractFHIRTemplateGenerator {
         // Check if this is an aggregated service case
         if (generatorProperties.containsKey("aggregatedService")) {
             // Handle aggregated service with multiple endpoints
-            AggregatedService aggregatedService = (AggregatedService) generatorProperties.get("aggregatedService");
             List<Map<String, String>> endpoints = new ArrayList<>();
 
-            int defaultPort = 9090;
-            for (BallerinaService service : aggregatedService.getServices().values()) {
-                Map<String, String> endpoint = createEndpointForService(service, generatorProperties, defaultPort);
-                endpoints.add(endpoint);
-            }
-
+            generatorProperties.put("resourceType", "FHIR");
+            Map<String, String> endpoint = createEndpointForSingleService(generatorProperties);
+            endpoints.add(endpoint);
             templateContext.setProperty("endpoints", endpoints);
         } else {
             // Handle single service case (existing logic)
@@ -88,29 +84,6 @@ public class ComponentYamlGenerator extends AbstractFHIRTemplateGenerator {
         }
 
         return templateContext;
-    }
-
-    private Map<String, String> createEndpointForService(BallerinaService service, Map<String, Object> generatorProperties, int port) {
-        Map<String, String> endpoint = new java.util.HashMap<>();
-
-        if (generatorProperties.containsKey("dependentPackageImportIdentifier")) {
-            String apiName = generatorProperties.get("dependentPackageImportIdentifier").toString().toLowerCase() +
-                    "-" +
-                    service.getName().toLowerCase() +
-                    "-api";
-            String displayName = generatorProperties.get("dependentPackageImportIdentifier").toString() + " " +
-                    service.getName() + " API";
-            endpoint.put("api_name", apiName);
-            endpoint.put("api_display_name", displayName);
-        } else {
-            endpoint.put("api_name", service.getName().toLowerCase() + "-api");
-            endpoint.put("api_display_name", service.getName() + " API");
-        }
-        endpoint.put("api_base_path", "/fhir/" + service.getFhirVersion() + "/" + service.getName() + "/" + service.getName());
-        endpoint.put("api_oas_file", "oas/" + service.getName() + ".yaml");
-        endpoint.put("api_port", String.valueOf(port));
-
-        return endpoint;
     }
 
     private Map<String, String> createEndpointForSingleService(Map<String, Object> generatorProperties) {
@@ -129,8 +102,14 @@ public class ComponentYamlGenerator extends AbstractFHIRTemplateGenerator {
             endpoint.put("api_name", generatorProperties.get("resourceType").toString().toLowerCase() + "-api");
             endpoint.put("api_display_name", generatorProperties.get("resourceType").toString() + " API");
         }
-        endpoint.put("api_base_path", "/" + generatorProperties.get("resourceType").toString());
-        endpoint.put("api_oas_file", "oas/" + generatorProperties.get("resourceType").toString() + ".yaml");
+
+        if (generatorProperties.containsKey("aggregatedService")) {
+            endpoint.put("api_base_path", "/fhir/" + generatorProperties.get("basePackageImportIdentifier"));
+            endpoint.put("api_oas_file", "oas/oas-definition.yaml");
+        } else {
+            endpoint.put("api_base_path", "/fhir/" + generatorProperties.get("basePackageImportIdentifier").toString() + "/" + generatorProperties.get("resourceType").toString());
+            endpoint.put("api_oas_file", "oas/" + generatorProperties.get("resourceType").toString() + ".yaml");
+        }
         endpoint.put("api_port", "9090");
 
         return endpoint;
